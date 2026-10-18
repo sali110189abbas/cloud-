@@ -1,8 +1,28 @@
 # crypto-trading-bot
 
-Systematic crypto trading bot. Current stage: **research / backtesting only. Not live, not paper-trading yet.**
+Systematic crypto trading bot for Binance.
 
-## Strategy v1: trend-following breakout (spot, long only)
+**Current bot: `live/trend_bot.py`, a BTC trend filter.** Research behind the choice: [RESEARCH.md](RESEARCH.md).
+Status: built and tested, **paper mode only**. Not run against real money.
+
+## Running the live bot
+
+```
+pip install -r requirements.txt
+BOT_MODE=paper python -m live.trend_bot        # simulated $10, real Binance prices
+```
+
+Run it once a day at ~00:05 UTC (cron: `5 0 * * * cd /path && BOT_MODE=paper python -m live.trend_bot`).
+State, logs and a trade journal go to `state/`. `touch state/STOP` halts all trading.
+Modes: `paper` (default), `testnet` (needs testnet keys), `live` (needs `BOT_CONFIRM_LIVE=yes`).
+API keys come from env vars `BINANCE_API_KEY` / `BINANCE_API_SECRET`. Never commit them.
+Use keys with trading enabled and **withdrawals disabled**, and restrict them to your server's IP.
+
+---
+
+## Older research: breakout strategy (`bot/`)
+
+### Strategy v1: trend-following breakout (spot, long only)
 
 | Rule | Value |
 |---|---|
@@ -17,7 +37,7 @@ Systematic crypto trading bot. Current stage: **research / backtesting only. Not
 
 All parameters live in `bot/config.py`.
 
-## Results (Binance daily data from TradingView, 2017-08 to 2026-10-17)
+### Results (Binance daily data from TradingView, 2017-08 to 2026-10-17)
 
 | Period | CAGR | Max DD | Sharpe | Trades | Expectancy | B&H CAGR | B&H Max DD |
 |---|---|---|---|---|---|---|---|
@@ -27,7 +47,7 @@ All parameters live in `bot/config.py`.
 
 Parameter sweep (24 combinations of lookback, ATR multiple and EMA): **24/24 profitable** both in-sample and out-of-sample. That means the edge isn't a single lucky parameter set.
 
-### What the numbers say
+#### What the numbers say
 
 - The edge is real but small. Positive expectancy holds across every parameter set and out of sample.
 - The edge is **decaying**: expectancy fell from 1.03R to 0.32R and Sharpe from 1.23 to 0.65 after 2022.
